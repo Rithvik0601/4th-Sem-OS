@@ -1,0 +1,73 @@
+//Write a program in c to implement first come first serve  taking arrival time and burst time as input
+#include<stdio.h>
+
+int main(){
+    int n, temp, temp1;
+
+    printf("Enter the number of processes: ");
+    scanf("%d",&n);
+
+    int at[10], bt[10], ct[10], tat[10], wt[10];
+
+    for(int i = 0; i<n; i++)
+    {
+        printf("Enter the Arrival time of process %d: ",i+1);
+        scanf("%d",&at[i]);
+        printf("Enter the Burst time of process %d: ",i+1);
+        scanf("%d",&bt[i]);
+
+    }
+
+    for(int i = 0; i<n-1; i++)
+        for(int j = 0; j<n-i-1; j++)
+        {
+            if(at[j]>at[j+1])
+            {
+                temp = at[j];
+                at[j] = at[j+1];
+                at[j+1] = temp;
+
+                temp1 = bt[j];
+                bt[j] = bt[j+1];
+                bt[j+1] = temp1;
+            }
+
+        }
+    int sum = 0;
+    for(int i = 0; i<n; i++)
+    {
+        while(at[i]>sum)
+            sum++;
+        ct[i] = sum + bt[i];
+        sum = ct[i];
+    }
+    for(int i = 0; i<n; i++)
+    {
+        tat[i] = ct[i]- at[i];
+    }
+    for(int i = 0; i<n; i++)
+    {
+        wt[i] = tat[i] - bt[i];
+    }
+
+    for(int i = 0; i<n;i++){
+        printf("AT: %d   BT: %d  CT: %d  TAT: %d  WT: %d\n",at[i],bt[i],ct[i],tat[i],wt[i]);
+    }
+
+    float tatsum = 0.0;
+    for(int i = 0; i<n; i++)
+    {
+        tatsum = tatsum + tat[i];
+    }
+    float tatavg = tatsum/n;
+    printf("\n\nAverage TAT: %f", tatavg);
+
+    float wtsum = 0.0;
+    for(int i = 0; i<n; i++)
+    {
+        wtsum = wtsum + wt[i];
+    }
+    float wtavg = wtsum/n;
+    printf("\nAverage WT: %f", wtavg);
+}
+
