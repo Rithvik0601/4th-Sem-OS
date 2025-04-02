@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_PROCESSES 100
+#define TIME_QUANTUM 4
+
+typedef struct {
+    int pid;
+    int at;
+    int bt;
+    int remaining_bt;
+    int queue;
+    int ct;
+    int tat;
+    int wt;
+} Process;
+
+int main() {
+    int n;
+    Process processes[MAX_PROCESSES];
+    Process queue1[MAX_PROCESSES]; // RR queue
+    Process queue2[MAX_PROCESSES]; // FCFS queue
+    int q1_count = 0, q2_count = 0;
+    int time = 0;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; i++) {
+        processes[i].pid = i + 1;
+        printf("Enter arrival time, burst time, and queue (1 for RR, 2 for FCFS) for process %d: ", i + 1);
+        scanf("%d %d %d", &processes[i].at, &processes[i].bt, &processes[i].queue);
+        processes[i].remaining_bt = processes[i].bt;
+
+        if (processes[i].queue == 1) {
+            queue1[q1_count++] = processes[i];
+        } else if (processes[i].queue == 2) {
+            queue2[q2_count++] = processes[i];
+        } else {
+            printf("Invalid queue number.\n");
+            return 1;
+        }
+    }
+
+    printf("\nProcess\tAT\tBT\tQueue\tCT\tTAT\tWT\n");
+
+    // RR Queue (Queue 1)
+    int q1_index = 0;
+    while (q1_count > 0) {
+        if (queue1[q1_index].remaining_bt > 0 && queue1[q1_index].at <= time) {
+            if (queue1[q1_index].remaining_bt <= TIME_QUANTUM) {
+                time += queue1[q1_index].remaining_bt;
+                queue1[q1_index].remaining_bt = 0;
+                queue1[q1_index].ct = time;
+                queue1[q1_index].tat = queue1[q1_index].ct - queue1[q1_index].at;
+                queue1[q1_index].wt = queue1[q1_index].tat - queue1[q1_index].bt;
+
+                printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", queue1[q1_index].pid, queue1[q1_index].at,
+                       queue1[q1_index].bt, queue1[q1_index].queue, queue1[q1_index].ct,
+                       queue1[q1_index].tat, queue1[q1_index].wt);
+
+                // Remove the finished process from the queue
+                for (int i = q1_index; i < q1_count - 1; i++) {
+                    queue1[i] = queue1[i + 1];
+                }
+                q1_count--;
+
+            } else {
+                time += TIME_QUANTUM;
+                queue1[q1_index].remaining_bt -= TIME_QUANTUM;
+            }
+        }
+
+        if(q1_count > 0){
+            q1_index = (q1_index + 1) % q1_count;
+        }
+
+        if(q1_count == 0 && q2_count == 0) break;
+
+        //check for new process arrival
+        int new_process_arrival = 0;
+        for(int i = 0; i < n; i++){
+            if(processes[i].at == time && processes[i].queue == 1 && processes[i].remaining_bt > 0){
+                queue1[q1_count++] = processes[i];
+                new_process_arrival = 1;
+            }
+        }
+        if(new_process_arrival) q1_index = 0;
+
+        if(q1_count == 0 && q2_count == 0) break;
+    }
+
+    // FCFS Queue (Queue 2)
+    for (int i = 0; i < q2_count; i++) {
+        if (queue2[i].at > time) {
+            time = queue2[i].at;
+        }
+        time += queue2[i].bt;
+        queue2[i].ct = time;
+        queue2[i].tat = queue2[i].ct - queue2[i].at;
+        queue2[i].wt = queue2[i].tat - queue2[i].bt;
+
+        printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", queue2[i].pid, queue2[i].at, queue2[i].bt,
+               queue2[i].queue, queue2[i].ct, queue2[i].tat, queue2[i].wt);
+    }
+
+    return 0;
+}
