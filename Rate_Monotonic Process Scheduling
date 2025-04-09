@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int id;
+    int period;
+    int execution;
+    int remaining;
+} Task;
+
+void schedule(Task tasks[], int num_tasks, int total_time) {
+    for (int time = 0; time < total_time; time++) {
+
+        for (int i = 0; i < num_tasks; i++) {
+            if (time % tasks[i].period == 0) {
+                tasks[i].remaining = tasks[i].execution;
+            }
+        }
+
+
+        Task *current_task = NULL;
+        for (int i = 0; i < num_tasks; i++) {
+            if (tasks[i].remaining > 0 && (current_task == NULL || tasks[i].period < current_task->period)) {
+                current_task = &tasks[i];
+            }
+        }
+
+
+        if (current_task) {
+            printf("Time %d: Executing Task %d\n", time, current_task->id);
+            current_task->remaining--;
+            if (current_task->remaining == 0) {
+                printf("Time %d: Task %d completed\n", time + 1, current_task->id);
+            }
+        } else {
+            printf("Time %d: Idle\n", time);
+        }
+    }
+}
+
+int main() {
+    int num_tasks, total_time;
+
+    printf("Enter the number of tasks: ");
+    scanf("%d", &num_tasks);
+    Task *tasks = malloc(num_tasks * sizeof(Task));
+
+    for (int i = 0; i < num_tasks; i++) {
+        printf("Enter period and execution time for Task %d: ", i + 1);
+        scanf("%d %d", &tasks[i].period, &tasks[i].execution);
+        tasks[i].id = i + 1;
+        tasks[i].remaining = 0;
+    }
+
+    printf("Enter total time for simulation: ");
+    scanf("%d", &total_time);
+
+    schedule(tasks, num_tasks, total_time);
+    free(tasks);
+    return 0;
+}
