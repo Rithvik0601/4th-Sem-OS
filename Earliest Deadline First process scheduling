@@ -1,0 +1,51 @@
+#include <stdio.h>
+
+typedef struct {
+    int id, period, deadline, burst_time;
+} Process;
+
+// Function to sort processes by deadline
+void sort_by_deadline(Process p[], int n) {
+    for (int i = 0; i < n-1; i++) {
+        for (int j = i+1; j < n; j++) {
+            if (p[i].deadline > p[j].deadline) {
+                Process temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+    
+    Process p[n];
+    
+    // Input for all processes
+    for (int i = 0; i < n; i++) {
+        p[i].id = i + 1;
+        printf("Enter period, deadline, and burst time for process %d: ", i+1);
+        scanf("%d %d %d", &p[i].period, &p[i].deadline, &p[i].burst_time);
+    }
+
+    // Sort processes by their deadlines
+    sort_by_deadline(p, n);
+    
+    int current_time = 0;  // Start time
+    printf("\nScheduled processes (Earliest Deadline First):\n");
+    printf("Time\tProcess ID\n");
+
+    for (int i = 0; i < n; i++) {
+        if (current_time < p[i].deadline) {
+            printf("%d\tP%d\n", current_time, p[i].id);
+            current_time += p[i].burst_time;  // Increment time by the burst time
+        } else {
+            printf("Missed deadline for P%d at time %d\n", p[i].id, current_time);
+        }
+    }
+
+    return 0;
+}
